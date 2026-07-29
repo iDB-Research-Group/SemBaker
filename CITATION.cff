@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use SemBaker, please cite the paper below (see preferred-citation)."
+title: "SemBaker"
+authors:
+  - family-names: "Dong"
+    given-names: "Wenkai"
+    email: "dongw@hawaii.edu"
+  - family-names: "Wang"
+    given-names: "Yifan"
+    email: "yifanw@hawaii.edu"
+repository-code: "https://github.com/iDB-Research-Group/SemBaker"
+license: AGPL-3.0-only
+preferred-citation:
+  type: article
+  title: "From Interpretation to Compilation: Compilation-Based Execution of Semantic Operators"
+  authors:
+    - family-names: "Dong"
+      given-names: "Wenkai"
+    - family-names: "Wang"
+      given-names: "Yifan"
+  year: 2026
+  journal: "arXiv preprint arXiv:2607.13407"
+  url: "https://arxiv.org/abs/2607.13407"

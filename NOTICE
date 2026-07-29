@@ -1,0 +1,19 @@
+SemBaker
+Copyright 2026 Wenkai Dong and Yifan Wang
+
+SemBaker is dual-licensed:
+
+  * Open-source license: GNU Affero General Public License v3.0 only (see
+    LICENSE). Free for research, evaluation, and any use that complies with
+    the AGPL — including its network-service copyleft: if you run a modified
+    version as a network service or distribute it, you must make your
+    corresponding source available under the AGPL.
+
+  * Commercial license: for organizations that cannot meet AGPL obligations
+    (e.g. embedding SemBaker in closed-source products or proprietary
+    services). Contact: dongw@hawaii.edu, yifanw@hawaii.edu
+
+One or more patent applications covering techniques embodied in this
+software have been filed. The AGPL grants patent rights only to recipients
+who comply with its terms; patent licensing for proprietary use is handled
+through the commercial license.

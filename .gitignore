@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Secrets / local config
+.env
+
+# SemBaker runtime artifacts
+.cx_cache/
+
+# Local tooling
+.claude/

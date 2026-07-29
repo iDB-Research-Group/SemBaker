@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="320" viewBox="0 0 1120 320" role="img" aria-labelledby="title desc">
+  <title id="title">SemBaker logo</title>
+  <desc id="desc">A glowing purple baker's cloche formed from code brackets beside the SemBaker wordmark.</desc>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#11172B"/>
+      <stop offset="1" stop-color="#21113A"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset=".55" stop-color="#C026D3"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#7C3AED"/>
+      <stop offset=".72" stop-color="#C026D3"/>
+      <stop offset="1" stop-color="#EA580C"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#2E1065" flood-opacity=".35"/>
+    </filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .word{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:750;letter-spacing:-5px}
+      .tag{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:600;letter-spacing:3.4px}
+    </style>
+  </defs>
+
+  <rect width="1120" height="320" rx="42" fill="#0B1020"/>
+  <circle cx="1040" cy="-40" r="240" fill="#7C3AED" opacity=".08"/>
+
+  <!-- Mark -->
+  <g transform="translate(40 30)" filter="url(#shadow)">
+    <rect width="260" height="260" rx="64" fill="url(#tile)"/>
+    <rect x="1" y="1" width="258" height="258" rx="63" fill="none" stroke="#A78BFA" stroke-opacity=".28" stroke-width="2"/>
+    <circle cx="130" cy="127" r="89" fill="#8B5CF6" opacity=".08"/>
+
+    <!-- Code brackets -->
+    <path d="M79 85L48 115l31 30" fill="none" stroke="url(#brand)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+    <path d="M181 85l31 30-31 30" fill="none" stroke="url(#brand)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+
+    <!-- Cloche -->
+    <path d="M73 171c3-42 26-69 57-69s54 27 57 69" fill="#17152D" stroke="url(#brand)" stroke-width="11" stroke-linecap="round"/>
+    <path d="M60 174h140" fill="none" stroke="url(#brand)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M50 197h160" fill="none" stroke="url(#brand)" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="130" cy="91" r="10" fill="#F0ABFC"/>
+
+    <!-- Heat / compile sparks -->
+    <path d="M104 140c-8 9-4 17 3 23M130 132c-8 10-4 18 3 25M156 140c-8 9-4 17 3 23" fill="none" stroke="#FDBA74" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="350" y="166" class="word" font-size="104" fill="#F8FAFC">Sem<tspan fill="url(#word)">Baker</tspan></text>
+  <text x="358" y="222" class="tag" font-size="19" fill="#94A3B8">BAKE SEMANTICS INTO CODE</text>
+</svg>

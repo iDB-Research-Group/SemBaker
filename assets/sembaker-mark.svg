@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SemBaker icon</title>
+  <desc id="desc">A purple and orange baker's cloche formed from code brackets.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0B1020"/><stop offset="1" stop-color="#25113E"/></linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8B5CF6"/><stop offset=".55" stop-color="#C026D3"/><stop offset="1" stop-color="#F97316"/></linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="3" y="3" width="506" height="506" rx="113" fill="none" stroke="#A78BFA" stroke-opacity=".28" stroke-width="6"/>
+  <circle cx="256" cy="248" r="178" fill="#8B5CF6" opacity=".07"/>
+
+  <path d="M157 165l-65 60 65 60" fill="none" stroke="url(#brand)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M355 165l65 60-65 60" fill="none" stroke="url(#brand)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+
+  <path d="M146 335c6-82 51-136 110-136s104 54 110 136" fill="#141327" stroke="url(#brand)" stroke-width="23" stroke-linecap="round"/>
+  <path d="M120 341h272M98 387h316" fill="none" stroke="url(#brand)" stroke-width="25" stroke-linecap="round"/>
+  <circle cx="256" cy="177" r="20" fill="#F0ABFC"/>
+  <path d="M205 273c-15 18-8 34 7 47M256 256c-16 20-8 37 7 51M307 273c-15 18-8 34 7 47" fill="none" stroke="#FDBA74" stroke-width="13" stroke-linecap="round"/>
+</svg>
