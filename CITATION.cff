@@ -12,12 +12,12 @@ repository-code: "https://github.com/iDB-Research-Group/SemBaker"
 license: AGPL-3.0-only
 preferred-citation:
   type: article
-  title: "From Interpretation to Compilation: Compilation-Based Execution of Semantic Operators"
+  title: "From Interpretation to Compilation: A Compilation-Based Execution Engine for Semantic Operator Systems"
   authors:
     - family-names: "Dong"
       given-names: "Wenkai"
     - family-names: "Wang"
       given-names: "Yifan"
   year: 2026
-  journal: "arXiv preprint arXiv:2607.13407"
-  url: "https://arxiv.org/abs/2607.13407"
+  journal: "arXiv preprint arXiv:2608.06677"
+  url: "https://arxiv.org/abs/2608.06677"

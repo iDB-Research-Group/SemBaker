@@ -37,9 +37,9 @@ breaks even at roughly a dozen rows, and beyond that cost and latency stay
 flat while the compiled function executes in microseconds per row (e.g. 10,000
 rows: 1 LLM call instead of 10,000).
 
-SemBaker implements the approach introduced in our vision paper
-[*From Interpretation to Compilation: Compilation-Based Execution of Semantic
-Operators*](https://arxiv.org/abs/2607.13407) (Dong & Wang, 2026) — see
+SemBaker implements the approach introduced in our paper
+[*From Interpretation to Compilation: A Compilation-Based Execution Engine
+for Semantic Operator Systems*](https://arxiv.org/abs/2608.06677) (Dong & Wang, 2026) — see
 [Citation](#citation).
 
 ## Install
@@ -207,14 +207,14 @@ If you use SemBaker in your research, please cite:
 
 ```bibtex
 @misc{dong2026compilation,
-  title         = {From Interpretation to Compilation: Compilation-Based
-                   Execution of Semantic Operators},
+  title         = {From Interpretation to Compilation: A Compilation-Based
+                   Execution Engine for Semantic Operator Systems},
   author        = {Dong, Wenkai and Wang, Yifan},
   year          = {2026},
-  eprint        = {2607.13407},
+  eprint        = {2608.06677},
   archivePrefix = {arXiv},
   primaryClass  = {cs.DB},
-  url           = {https://arxiv.org/abs/2607.13407},
+  url           = {https://arxiv.org/abs/2608.06677},
 }
 ```
 
