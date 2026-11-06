@@ -18,6 +18,7 @@ import time
 from typing import Callable
 
 from sembaker.core import build_map_prompt, compile_artifact, make_key
+from sembaker.core.redact import describe
 
 from palimpzest.constants import Cardinality, Model, PromptStrategy
 from palimpzest.core.elements.records import DataRecord
@@ -183,7 +184,7 @@ class CompiledMap(ConvertOp):
             value = "" if value is None else value
         except Exception as e:
             if self.verbose:
-                print(f"[CompiledMap exec error] {e}")
+                print(f"[CompiledMap exec error] {describe(e)}")
             value = ""
         exec_dur = time.time() - exec_start
 

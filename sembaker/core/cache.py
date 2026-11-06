@@ -97,7 +97,15 @@ def get(key: str):
     )
 
 
-def put(key: str, artifact) -> None:
+def put(key: str, artifact, meta: dict | None = None) -> None:
+    """Store the compiled artifact under `key`.
+
+    `meta` records what the key was DERIVED from (kind, predicate, columns,
+    model_id). The key itself is a hash, so without this a fresh process can
+    read the artifacts back but cannot tell what any of them computes — which
+    is exactly what the semantic cache (sembaker.core.semcache) needs in order
+    to rebuild its index at startup. Optional and additive: entries written
+    before this existed simply have no "meta" and are skipped by index()."""
     _DEFAULT_DIR.mkdir(parents=True, exist_ok=True)
     rec = {
         "fn_name": artifact.fn_name,
@@ -109,8 +117,32 @@ def put(key: str, artifact) -> None:
         "compile_secs": artifact.duration_secs,
         "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
     }
+    if meta:
+        rec["meta"] = {"kind": meta.get("kind", ""),
+                       "predicate": meta.get("predicate", ""),
+                       "columns": list(meta.get("columns", [])),
+                       "model_id": meta.get("model_id", "")}
     _path(key).write_text(json.dumps(rec, ensure_ascii=False, indent=1),
                           encoding="utf-8")
+
+
+def index():
+    """Yield (key, meta) for every cached artifact that recorded its provenance.
+
+    Used by the semantic cache to repopulate itself from disk. Entries without
+    "meta" (written before put() took it, or by an older sembaker) are skipped
+    rather than guessed at: a wrong predicate here would make the semantic
+    layer reason about a function it has mislabeled."""
+    if not _DEFAULT_DIR.exists():
+        return
+    for p in sorted(_DEFAULT_DIR.glob("*.json")):
+        try:
+            rec = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        meta = rec.get("meta")
+        if meta and meta.get("predicate"):
+            yield p.stem, meta
 
 
 def get_text(key: str):

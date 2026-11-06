@@ -47,6 +47,7 @@ except ImportError as e:
 
 from sembaker.core import build_filter_prompt, build_join_prompt, build_map_prompt, compile_artifact, make_key
 from sembaker.optimizer.decision import Decision, decide
+from sembaker.core.redact import describe
 
 COMPILE_MODEL_ID = os.getenv("CX_COMPILE_MODEL", "gpt-5-mini-2025-08-07")
 
@@ -486,7 +487,7 @@ def optimize(
             try:
                 w.ensure_compiled()
             except Exception as e:
-                print(f'[eager] compile failed ({type(e).__name__}: {e}); will lazy-retry at run time')
+                print(f'[eager] compile failed ({describe(e)}); will lazy-retry at run time')
                 w.artifact = None
 
         scheduler.run_map(_compile_one, _injected, label="nirvana-eager")

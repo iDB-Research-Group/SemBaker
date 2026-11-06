@@ -8,9 +8,14 @@ build/
 
 # Secrets / local config
 .env
+.env.*
+!.env.example
 
 # SemBaker runtime artifacts
 .cx_cache/
 
 # Local tooling
 .claude/
+
+# macOS
+.DS_Store
