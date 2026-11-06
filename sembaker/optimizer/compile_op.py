@@ -9,6 +9,11 @@ Nirvana / DocETL:
       ir1 -> flat DSL IR      (sembaker.core.compile_ir)     -> deterministic transpile
       ir2 -> expression tree  (sembaker.core.compile_ir2)    -> deterministic transpile
   CX_CACHE    = 1 (default) | 0              reuse/store compiled artifacts
+  CX_SEMCACHE = 0 (default) | 1              semantic cache: on an exact-key miss,
+      reuse an artifact compiled for a REWORDING of this operator, if the
+      classifier in sembaker.core.semcache judges the two equivalent. Requires
+      CX_CACHE=1 and the `semcache` extra; off by default because it loads
+      ~1.5GB of sentence-transformer encoders.
   CX_REFINE   = 0 (default) | 1              rewrite the predicate first (applies to all methods)
   CX_VALIDATE = 0 (default) | 1              pre-cache validation gate / best-of-N
 
@@ -29,6 +34,7 @@ from sembaker.core import (
     make_key,
 )
 from sembaker.core import cache as _cache
+from sembaker.core.redact import describe
 from sembaker.optimizer.refine_gate import maybe_refine, maybe_validator
 
 _IR_MAX_ATTEMPTS = int(os.environ.get("CX_IR_MAX_ATTEMPTS", "3"))
@@ -55,6 +61,77 @@ def method() -> str:
 
 def _cache_on() -> bool:
     return os.environ.get("CX_CACHE", "1") != "0"
+
+
+def _sem_on() -> bool:
+    return os.environ.get("CX_SEMCACHE", "0") == "1"
+
+
+def _semantic_hit(prefix, pred, cols_key, model_id, tag):
+    """Ask the semantic cache whether an existing artifact already does this.
+
+    Returns a CompiledArtifact on an `equivalent` verdict, else None. Every
+    failure mode here (no model file, encoders missing, a stale index entry
+    whose artifact has been deleted) degrades to None: a semantic miss costs
+    one compile, while letting an exception escape would break a pipeline that
+    worked fine before the flag was set."""
+    try:
+        from sembaker.core import semcache as _sem
+
+        sc = _sem.get_cache()
+        if sc is None:
+            return None
+        _hydrate(sc)
+        d = sc.lookup(prefix, pred, list(cols_key), model_id)
+        if not d.hit or d.stage != "semantic":
+            return None
+        art = _cache.get(d.key)
+        if art is None:                  # index points at a deleted artifact
+            return None
+        print(f"[{tag or prefix}] semantic cache HIT ({d.score:.3f}) -> 0 LLM calls\n"
+              f"    query  : {pred!r}\n"
+              f"    reusing: {d.entry.predicate!r}")
+        return art
+    except Exception as exc:
+        print(f"[semcache] lookup failed, compiling instead: {describe(exc)}")
+        return None
+
+
+def _semantic_insert(cache_meta, key):
+    """Register a freshly compiled artifact so later rewordings can find it."""
+    if cache_meta is None or not _sem_on():
+        return
+    try:
+        from sembaker.core import semcache as _sem
+
+        sc = _sem.get_cache()
+        if sc is not None:
+            sc.insert(cache_meta["kind"], cache_meta["predicate"],
+                      cache_meta["columns"], cache_meta["model_id"], key=key)
+    except Exception:
+        pass
+
+
+def _hydrate(sc):
+    """Seed the semantic index from artifacts already on disk, once per cache.
+
+    The flag lives on the cache object rather than in a module global so that
+    replacing the cache (semcache.reset_cache(), or a test pointing CX_CACHE_DIR
+    somewhere else) gets a fresh hydration instead of silently inheriting a
+    "already done" that was true of a different cache."""
+    if getattr(sc, "_hydrated", False):
+        return
+    sc._hydrated = True
+    n = 0
+    for key, meta in _cache.index():
+        try:
+            sc.insert(meta["kind"], meta["predicate"], meta["columns"],
+                      meta["model_id"], key=key)
+            n += 1
+        except Exception:
+            continue
+    if n:
+        print(f"[semcache] indexed {n} cached artifacts")
 
 
 def _cols_key(kind, cols, samples, samples_left, samples_right):
@@ -88,13 +165,24 @@ def compile_operator(kind, intent, model_id, *, cols=None, samples=None,
                         samples_left=samples_left, samples_right=samples_right)
     cols_key = _cols_key(kind, cols, samples, samples_left, samples_right)
     key = None
+    cache_meta = None
     if _cache_on():
         # method in the key namespace so e2e/ir1/ir2 artifacts never collide
         prefix = kind if m == "e2e" else f"{m}:{kind}"
         key = make_key(prefix, pred, cols_key, model_id, extra=extra)
+        cache_meta = {"kind": prefix, "predicate": pred,
+                      "columns": list(cols_key), "model_id": model_id}
         hit = _cache.get(key)
         if hit is not None:
             return hit
+
+        # CX_SEMCACHE=1: the exact key missed, but a REWORDING of this operator
+        # may already be compiled. Only an `equivalent` verdict is acted on;
+        # anything else falls through to a real compile.
+        if _sem_on():
+            art = _semantic_hit(prefix, pred, cols_key, model_id, tag)
+            if art is not None:
+                return art
 
     # single-flight rendezvous: if this exact artifact is being compiled by
     # another thread (a background pipeline-warm task, or a sibling operator
@@ -121,10 +209,13 @@ def compile_operator(kind, intent, model_id, *, cols=None, samples=None,
             prompt = (build_join_prompt(pred, samples_left, samples_right) if kind == "join"
                       else (build_filter_prompt if kind == "filter" else build_map_prompt)(pred, cols_key))
             # compile_artifact does its own cache + best-of-N via the validator
-            return compile_artifact(
+            art = compile_artifact(
                 prompt=prompt, fn_name=f"compiled_{kind}", model_id=model_id,
-                tag=tag or f"CX/{kind}", cache_key=key, validator=validator,
+                tag=tag or f"CX/{kind}", cache_key=key, cache_meta=cache_meta,
+                validator=validator,
                 usd_per_input_token=usd_per_input_token, usd_per_output_token=usd_per_output_token)
+            _semantic_insert(cache_meta, key)
+            return art
 
         # ir1 / ir2 : draft the IR (best-of-N if a validator is active), transpile deterministically
         attempts = _IR_MAX_ATTEMPTS if validator is not None else 1
@@ -157,7 +248,8 @@ def compile_operator(kind, intent, model_id, *, cols=None, samples=None,
             else:
                 raise RuntimeError(f"{m} compile produced no valid artifact for {kind}")
         if key is not None:
-            _cache.put(key, best)
+            _cache.put(key, best, meta=cache_meta)
+            _semantic_insert(cache_meta, key)
         return best
     finally:
         if own_ev is not None:

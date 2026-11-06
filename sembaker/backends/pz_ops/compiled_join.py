@@ -17,6 +17,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable
 
 from sembaker.core import build_join_prompt, compile_artifact, make_key
+from sembaker.core.redact import describe
 
 from palimpzest.constants import (
     NAIVE_EST_JOIN_SELECTIVITY,
@@ -176,7 +177,7 @@ class CompiledNestedLoopsJoin(JoinOp):
             passed = bool(self._compiled_fn(left_candidate.to_dict(), right_candidate.to_dict()))
         except Exception as e:
             if self.verbose:
-                print(f"[CompiledNestedLoopsJoin exec error] {e}")
+                print(f"[CompiledNestedLoopsJoin exec error] {describe(e)}")
             passed = False
         exec_dur = time.time() - start
 

@@ -50,6 +50,7 @@ pip install sembaker[pz]             # + Palimpzest adapter deps
 pip install sembaker[lotus]          # + LOTUS (lotus-ai)
 pip install sembaker[nirvana]        # + Nirvana (nirvana-ai)
 pip install sembaker[docetl]         # + DocETL
+pip install sembaker[semcache]       # + semantic cache (sentence-transformers, scikit-learn)
 pip install sembaker[all]            # everything
 ```
 
@@ -157,6 +158,7 @@ apply uniformly across all backends:
 |---|---|---|
 | `CX_COMPILE` | `e2e` (default) · `ir1` · `ir2` | compile method (see IR section) |
 | `CX_CACHE` | `1` (default) · `0` | reuse/store compiled artifacts |
+| `CX_SEMCACHE` | `0` (default) · `1` | semantic cache: reuse an artifact compiled for a reworded version of the operator (needs `CX_CACHE=1` and the `semcache` extra) |
 | `CX_REFINE` | `0` (default) · `1` | rewrite the predicate into a concrete, column-grounded one first |
 | `CX_VALIDATE` | `0` (default) · `1` | pre-cache validation gate: score draws on LLM-labeled samples, keep the best |
 | `CX_IR_FALLBACK` | `1` | if the IR can't express an operator, fall back to `e2e` |
@@ -172,6 +174,17 @@ apply uniformly across all backends:
 - **cache** (`sembaker.core.cache`) — persistent, keyed on `(method, op,
   canonicalized predicate, columns, model)`. The key **excludes the backend**:
   an artifact compiled for one engine is reused by another.
+- **semantic cache** (`sembaker.core.semcache`, `CX_SEMCACHE=1`) — on an
+  exact-key miss, looks for an artifact compiled for a *reworded* version of
+  the same operator ("keep reviews rated 4+" vs "retain reviews with a rating
+  of at least 4") and reuses it instead of compiling. Candidates must match on
+  operator kind, columns and model; a bundled classifier
+  (`sembaker/core/models/semcache_head.joblib`) then judges each candidate in
+  both directions, and only a two-way "equivalent" verdict is reused. Lookups
+  cost ~0.2–0.3 s, so it pays off only when queries repeat or get reworded
+  (roughly >25% hits against a ~1.2 s compile). It loads ~1.5 GB of encoders
+  on first use. Point `CX_SEMCACHE_MODEL` at another `.joblib` to swap the
+  classifier.
 
 ## IR-decoupled compilation (`CX_COMPILE=ir1|ir2`)
 

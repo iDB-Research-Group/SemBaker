@@ -17,6 +17,7 @@ import time
 from typing import Callable
 
 from sembaker.core import build_filter_prompt, compile_artifact, make_key
+from sembaker.core.redact import describe
 
 from palimpzest.constants import (
     NAIVE_EST_FILTER_SELECTIVITY,
@@ -186,7 +187,7 @@ class CompiledFilter(FilterOp):
             passed = bool(self._compiled_fn(candidate.to_dict()))
         except Exception as e:
             if self.verbose:
-                print(f"[CompiledFilter exec error] {e}")
+                print(f"[CompiledFilter exec error] {describe(e)}")
             passed = False
         exec_dur = time.time() - exec_start
 

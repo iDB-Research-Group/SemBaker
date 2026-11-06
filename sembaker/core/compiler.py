@@ -21,6 +21,8 @@ from typing import Any, Callable
 
 from openai import OpenAI
 
+from sembaker.core.redact import describe
+
 
 @dataclass
 class CompiledArtifact:
@@ -177,6 +179,7 @@ def compile_artifact(
     tag: str | None = None,
     print_code: bool = True,
     cache_key: str | None = None,
+    cache_meta: dict | None = None,
     validator: Callable[[Callable], float] | None = None,
     min_score: float = 0.8,
     max_attempts: int = 3,
@@ -193,6 +196,9 @@ def compile_artifact(
         tag: label used in diagnostics (defaults to fn_name).
         print_code: print the compiled code for run-log transparency.
         cache_key: if set, reuse/store the artifact under this key.
+        cache_meta: provenance stored alongside the artifact (kind, predicate,
+            columns, model_id) so the semantic cache can rebuild its index
+            from disk. Ignored when cache_key is None.
         validator: optional fn(compiled_fn) -> score in [0,1]. When given,
             compile is retried up to max_attempts; the highest-scoring draw
             is kept (early-exit once a draw reaches min_score). This is the
@@ -275,7 +281,7 @@ def compile_artifact(
     if best is None:
         raise RuntimeError(
             f"compile produced no usable `{fn_name}` in {attempts} attempt(s)"
-            + (f": {type(last_err).__name__}: {last_err}" if last_err else "")
+            + (f": {describe(last_err)}" if last_err else "")
         )
 
     if print_code:
@@ -296,6 +302,6 @@ def compile_artifact(
     if cache_key is not None:
         from sembaker.core import cache as _cache
 
-        _cache.put(cache_key, best)
+        _cache.put(cache_key, best, meta=cache_meta)
 
     return best
